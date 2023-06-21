@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Filtrar Dados</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+    }
+  </style>
+  <script>
+    function getFilteredData() {
+      // Obter os valores selecionados pelo usuário
+      var firstYear = document.getElementById("first_year").value;
+      var secondYear = document.getElementById("second_year").value;
+      var table = document.getElementById("table").value;
+
+      // Montar a URL da requisição
+      var url = "http://localhost:3333/filter?first_year=" + firstYear + "&second_year=" + secondYear + "&table=" + table;
+
+      // Fazer a requisição usando o método Fetch API
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          // Preencher a tabela com os dados retornados
+          var tableBody = document.getElementById("resultsTableBody");
+          tableBody.innerHTML = "";
+
+          data.result.forEach(item => {
+            var row = tableBody.insertRow();
+            var yearCell = row.insertCell();
+            var eventOrBookCell = row.insertCell();
+            var titleCell = row.insertCell();
+            var naturalPersonNameCell = row.insertCell();
+
+            yearCell.innerHTML = item.year;
+            eventOrBookCell.innerHTML = item.event_or_book;
+            titleCell.innerHTML = item.title;
+            naturalPersonNameCell.innerHTML = item.natural_person_name;
+          });
+        });
+    }
+  </script>
+</head>
+<body>
+  <h1>Filtrar Dados</h1>
+  <form>
+    <label for="first_year">Ano Inicial:</label>
+    <input type="text" id="first_year" name="first_year">
+    <br>
+    <label for="second_year">Ano Final:</label>
+    <input type="text" id="second_year" name="second_year">
+    <br>
+    <label for="table">Tabela:</label>
+    <select id="table" name="table">
+      <option value="article">Artigo</option>
+      <option value="event">Evento</option>
+      <option value="apresentation">Apresentação</option>
+      <option value="patent">Patente</option>
+      <option value="producttechnology">Produção Tecnológica</option>
+      <option value="scientificjournal">Journal Científico</option>
+      <option value="all">Todas</option>
+    </select>
+    <br>
+    <button type="button" onclick="getFilteredData()">Filtrar</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Year</th>
+        <th>Event or Book</th>
+        <th>Title</th>
+        <th>Natural Person Name</th>
+      </tr>
+    </thead>
+    <tbody id="resultsTableBody"></tbody>
+  </table>
+</body>
+</html>
+    
