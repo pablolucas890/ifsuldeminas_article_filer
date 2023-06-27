@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <title>Filtrar Dados</title>
   <style>
     table {
@@ -8,7 +11,8 @@
       width: 100%;
     }
 
-    th, td {
+    th,
+    td {
       border: 1px solid black;
       padding: 8px;
       text-align: left;
@@ -16,72 +20,106 @@
   </style>
   <script>
     function getFilteredData() {
-      // Obter os valores selecionados pelo usuário
       var firstYear = document.getElementById("first_year").value;
       var secondYear = document.getElementById("second_year").value;
       var table = document.getElementById("table").value;
+      var name = document.getElementById("name").value;
+      var title = document.getElementById("title").value;
 
-      // Montar a URL da requisição
-      var url = "http://localhost:3333/filter?first_year=" + firstYear + "&second_year=" + secondYear + "&table=" + table;
+      var url = "http://localhost:3333/filter?first_year=" + firstYear
+        + "&second_year=" + secondYear
+        + "&table=" + table
+        + "&name=" + name
+        + "&title=" + title;
 
-      // Fazer a requisição usando o método Fetch API
       fetch(url)
         .then(response => response.json())
         .then(data => {
-          // Preencher a tabela com os dados retornados
           var tableBody = document.getElementById("resultsTableBody");
           tableBody.innerHTML = "";
+
+          const getTable = {
+            article: "Artigo",
+            event: "Evento",
+            apresentation: "Apresentação",
+            patent: "Patente",
+            producttechnology: "Produto Tecnológico",
+            scientificjournal: "Journal"
+          }
 
           data.result.forEach(item => {
             var row = tableBody.insertRow();
             var yearCell = row.insertCell();
             var eventOrBookCell = row.insertCell();
             var titleCell = row.insertCell();
+            var type = row.insertCell();
             var naturalPersonNameCell = row.insertCell();
+            var link = row.insertCell();
 
-            yearCell.innerHTML = item.year;
-            eventOrBookCell.innerHTML = item.event_or_book;
-            titleCell.innerHTML = item.title;
-            naturalPersonNameCell.innerHTML = item.natural_person_name;
+            yearCell.innerHTML = item.year ?? '';
+            eventOrBookCell.innerHTML = item.event_or_book ?? '';
+            titleCell.innerHTML = (item.NomeTabela ? `<b>[${getTable[item.NomeTabela.split('_')[2]]}]</b> ` : '') + item.title ?? '';
+            type.innerHTML = item.type ?? '';
+            naturalPersonNameCell.innerHTML = item.name ?? '';
+            link.innerHTML = item.link
+              ? `<a href="${item.link.substring(1, item.link.length - 1)}" target="_blanck">Acessar</a>`
+              : '';
           });
         });
     }
   </script>
 </head>
+
 <body>
-  <h1>Filtrar Dados</h1>
+  <h2>Filtrar</h2>
   <form>
-    <label for="first_year">Ano Inicial:</label>
-    <input type="text" id="first_year" name="first_year">
-    <br>
-    <label for="second_year">Ano Final:</label>
-    <input type="text" id="second_year" name="second_year">
-    <br>
-    <label for="table">Tabela:</label>
-    <select id="table" name="table">
-      <option value="article">Artigo</option>
-      <option value="event">Evento</option>
-      <option value="apresentation">Apresentação</option>
-      <option value="patent">Patente</option>
-      <option value="producttechnology">Produção Tecnológica</option>
-      <option value="scientificjournal">Journal Científico</option>
-      <option value="all">Todas</option>
-    </select>
-    <br>
+    <div class="row">
+      <div class="col-3">
+        <label for="first_year">Ano Inicial:</label>
+        <input type="text" id="first_year" name="first_year">
+        <label for="second_year">Ano Final:</label>
+        <input type="text" id="second_year" name="second_year">
+      </div>
+      <div class="col-3">
+        <label for="table">Tabela:</label>
+        <select id="table" name="table">
+          <option value="article">Artigo</option>
+          <option value="event">Evento</option>
+          <option value="apresentation">Apresentação</option>
+          <option value="patent">Patente</option>
+          <option value="producttechnology">Produção Tecnológica</option>
+          <option value="scientificjournal">Journal Científico</option>
+          <option value="all">Todas</option>
+        </select>
+        <br>
+        <label for="name">Pesquisador:</label>
+        <input type="text" id="name" name="name">
+      </div>
+      <div class="col-3">
+        <label for="title">Título:</label>
+        <input type="text" id="title" title="name">
+      </div>
+      <div class="col-3">
+
+      </div>
+    </div>
     <button type="button" onclick="getFilteredData()">Filtrar</button>
   </form>
-
-  <table>
+  <br>
+  <br>
+  <table class="table ">
     <thead>
       <tr>
-        <th>Year</th>
-        <th>Event or Book</th>
-        <th>Title</th>
-        <th>Natural Person Name</th>
+        <th scope="col">Ano</th>
+        <th scope="col">Evento ou Livro</th>
+        <th scope="col">Título</th>
+        <th scope="col">Tipo / Status</th>
+        <th scope="col">Pesquisador</th>
+        <th scope="col">Link</th>
       </tr>
     </thead>
     <tbody id="resultsTableBody"></tbody>
   </table>
 </body>
+
 </html>
-    
