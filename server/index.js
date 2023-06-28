@@ -20,6 +20,7 @@ app.get('/filter', (req, res) => {
     const table = req.query.table ?? 'all'
     const name = req.query.name ?? ''
     const title = req.query.title ?? ''
+    const campus = req.query.campus ?? ''
 
     const where_array = [
         {
@@ -41,6 +42,11 @@ app.get('/filter', (req, res) => {
             value1: 'title',
             operator: 'LIKE',
             value2: `'%${title}%'`
+        },
+        {
+            value1: 'campus',
+            operator: 'LIKE',
+            value2: `'%${campus}%'`
         },
     ]
     let where_array_text = ""
@@ -78,7 +84,7 @@ app.get('/filter', (req, res) => {
         + (event_or_book[table] ?? ' ')
         + (link[table] ?? ' ')
         + (type[table] ? type[table] + ", " : ' ')
-        + " title, PN.name AS name FROM biographical_production_"
+        + " title, PN.name AS name, PN.campus AS campus FROM biographical_production_"
         + table + " LEFT JOIN person_naturalperson AS PN ON natural_person_id = PN.id"
         + " WHERE " + (where_array_text.trim() || "1")
 
@@ -89,7 +95,8 @@ app.get('/filter', (req, res) => {
     query2 += "Tabela.event_or_book, ";
     query2 += "Tabela.link, ";
     query2 += "Tabela.type, ";
-    query2 += "PN.name AS name ";
+    query2 += "PN.name AS name, ";
+    query2 += "PN.campus AS campus ";
     query2 += "FROM ( ";
     query2 += "SELECT 'biographical_production_article' AS NomeTabela, year, title, natural_person_id, title_book as event_or_book, home_page_article as link, " + type['article'] + " FROM biographical_production_article ";
     query2 += "UNION ";
@@ -105,6 +112,8 @@ app.get('/filter', (req, res) => {
     query2 += ") AS Tabela ";
     query2 += "LEFT JOIN person_naturalperson AS PN ON Tabela.natural_person_id = PN.id";
     query2 += " WHERE " + (where_array_text.trim() || "1")
+
+    console.log(where_array_text)
 
     db.query(table === "all" ? query2 : query1, (err, result) =>
         err ? console.log(err) : res.json({ result })

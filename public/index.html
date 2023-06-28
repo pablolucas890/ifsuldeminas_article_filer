@@ -25,12 +25,14 @@
       var table = document.getElementById("table").value;
       var name = document.getElementById("name").value;
       var title = document.getElementById("title").value;
+      var campus = document.getElementById("campus").value;
 
       var url = "http://localhost:3333/filter?first_year=" + firstYear
         + "&second_year=" + secondYear
         + "&table=" + table
         + "&name=" + name
-        + "&title=" + title;
+        + "&title=" + title
+        + "&campus=" + campus;
 
       fetch(url)
         .then(response => response.json())
@@ -54,6 +56,7 @@
             var titleCell = row.insertCell();
             var type = row.insertCell();
             var naturalPersonNameCell = row.insertCell();
+            var campus = row.insertCell();
             var link = row.insertCell();
 
             yearCell.innerHTML = item.year ?? '';
@@ -61,6 +64,7 @@
             titleCell.innerHTML = (item.NomeTabela ? `<b>[${getTable[item.NomeTabela.split('_')[2]]}]</b> ` : '') + item.title ?? '';
             type.innerHTML = item.type ?? '';
             naturalPersonNameCell.innerHTML = item.name ?? '';
+            campus.innerHTML = item.campus ?? '';
             link.innerHTML = item.link
               ? `<a href="${item.link.substring(1, item.link.length - 1)}" target="_blanck">Acessar</a>`
               : '';
@@ -83,13 +87,13 @@
       <div class="col-3">
         <label for="table">Tabela:</label>
         <select id="table" name="table">
+          <option value="all">Todas</option>
           <option value="article">Artigo</option>
           <option value="event">Evento</option>
           <option value="apresentation">Apresentação</option>
           <option value="patent">Patente</option>
           <option value="producttechnology">Produção Tecnológica</option>
           <option value="scientificjournal">Journal Científico</option>
-          <option value="all">Todas</option>
         </select>
         <br>
         <label for="name">Pesquisador:</label>
@@ -97,7 +101,21 @@
       </div>
       <div class="col-3">
         <label for="title">Título:</label>
-        <input type="text" id="title" title="name">
+        <input type="text" id="title" title="title">
+        <br>
+        <label for="campus">Campus:</label>
+        <select id="campus" name="campus">
+          <option value="">Todos</option>
+          <option value="IFSULDEMINAS">IFSULDEMINAS - Reitoria</option>
+          <option value="PCS">Poços de Caldas</option>
+          <option value="MUZ">Muzambinho</option>
+          <option value="IFS">Inconfidentes</option>
+          <option value="PAS">Passos</option>
+          <option value="MCH">Machado</option>
+          <option value="POA">Pouso Alegre</option>
+          <option value="TCO">Três Corações</option>
+          <option value="CDM">Carmo de Minas</option>
+        </select>
       </div>
       <div class="col-3">
 
@@ -115,6 +133,7 @@
         <th scope="col">Título</th>
         <th scope="col">Tipo / Status</th>
         <th scope="col">Pesquisador</th>
+        <th scope="col">Campus</th>
         <th scope="col">Link</th>
       </tr>
     </thead>
