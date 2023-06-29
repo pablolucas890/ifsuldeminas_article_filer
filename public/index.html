@@ -4,6 +4,11 @@
 <head>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
     integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+  <!-- <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script> -->
   <title>Filtrar Dados</title>
   <style>
     table {
@@ -18,60 +23,6 @@
       text-align: left;
     }
   </style>
-  <script>
-    function getFilteredData() {
-      var firstYear = document.getElementById("first_year").value;
-      var secondYear = document.getElementById("second_year").value;
-      var table = document.getElementById("table").value;
-      var name = document.getElementById("name").value;
-      var title = document.getElementById("title").value;
-      var campus = document.getElementById("campus").value;
-
-      var url = "http://localhost:3333/filter?first_year=" + firstYear
-        + "&second_year=" + secondYear
-        + "&table=" + table
-        + "&name=" + name
-        + "&title=" + title
-        + "&campus=" + campus;
-
-      fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          var tableBody = document.getElementById("resultsTableBody");
-          tableBody.innerHTML = "";
-
-          const getTable = {
-            article: "Artigo",
-            event: "Evento",
-            apresentation: "Apresentação",
-            patent: "Patente",
-            producttechnology: "Produto Tecnológico",
-            scientificjournal: "Journal"
-          }
-
-          data.result.forEach(item => {
-            var row = tableBody.insertRow();
-            var yearCell = row.insertCell();
-            var eventOrBookCell = row.insertCell();
-            var titleCell = row.insertCell();
-            var type = row.insertCell();
-            var naturalPersonNameCell = row.insertCell();
-            var campus = row.insertCell();
-            var link = row.insertCell();
-
-            yearCell.innerHTML = item.year ?? '';
-            eventOrBookCell.innerHTML = item.event_or_book ?? '';
-            titleCell.innerHTML = (item.NomeTabela ? `<b>[${getTable[item.NomeTabela.split('_')[2]]}]</b> ` : '') + item.title ?? '';
-            type.innerHTML = item.type ?? '';
-            naturalPersonNameCell.innerHTML = item.name ?? '';
-            campus.innerHTML = item.campus ?? '';
-            link.innerHTML = item.link
-              ? `<a href="${item.link.substring(1, item.link.length - 1)}" target="_blanck">Acessar</a>`
-              : '';
-          });
-        });
-    }
-  </script>
 </head>
 
 <body>
@@ -122,10 +73,11 @@
       </div>
     </div>
     <button type="button" onclick="getFilteredData()">Filtrar</button>
+    <button type="button" onclick="converterTabelaParaCSV()">Baixar CSV</button>
   </form>
   <br>
   <br>
-  <table class="table ">
+  <table class="table" id="tabela">
     <thead>
       <tr>
         <th scope="col">Ano</th>
@@ -134,11 +86,92 @@
         <th scope="col">Tipo / Status</th>
         <th scope="col">Pesquisador</th>
         <th scope="col">Campus</th>
-        <th scope="col">Link</th>
+        <th scope="col">Link ou DOI</th>
       </tr>
     </thead>
     <tbody id="resultsTableBody"></tbody>
   </table>
 </body>
+
+<script>
+  // $(document).ready(function () {
+  //   $('#tabela').DataTable();
+  // });
+  function converterTabelaParaCSV() {
+    var csv = [];
+    var rows = document.getElementById('tabela').getElementsByTagName('tr');
+
+    for (var i = 0; i < rows.length; i++) {
+      var row = [];
+      var cells = i === 0 ? rows[i].getElementsByTagName('th') : rows[i].getElementsByTagName('td');
+      for (var j = 0; j < cells.length; j++) {
+        row.push(`"${cells[j].innerText}"`);
+      }
+      csv.push(row.join(';'));
+    }
+
+    var encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csv.join('\n'));
+    var link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'dados.csv');
+    document.body.appendChild(link);
+    link.click();
+  }
+
+  function getFilteredData() {
+    var firstYear = document.getElementById("first_year").value;
+    var secondYear = document.getElementById("second_year").value;
+    var table = document.getElementById("table").value;
+    var name = document.getElementById("name").value;
+    var title = document.getElementById("title").value;
+    var campus = document.getElementById("campus").value;
+
+    var url = "http://localhost:3333/filter?first_year=" + firstYear
+      + "&second_year=" + secondYear
+      + "&table=" + table
+      + "&name=" + name
+      + "&title=" + title
+      + "&campus=" + campus;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        var tableBody = document.getElementById("resultsTableBody");
+        tableBody.innerHTML = "";
+
+        const getTable = {
+          article: "Artigo",
+          event: "Evento",
+          apresentation: "Apresentação",
+          patent: "Patente",
+          producttechnology: "Produto Tecnológico",
+          scientificjournal: "Journal"
+        }
+
+        data.result.forEach(item => {
+          var row = tableBody.insertRow();
+          var yearCell = row.insertCell();
+          var eventOrBookCell = row.insertCell();
+          var titleCell = row.insertCell();
+          var type = row.insertCell();
+          var naturalPersonNameCell = row.insertCell();
+          var campus = row.insertCell();
+          var link = row.insertCell();
+
+          yearCell.innerHTML = item.year ?? '';
+          eventOrBookCell.innerHTML = item.event_or_book ?? '';
+          titleCell.innerHTML = (item.NomeTabela ? `<b>[${getTable[item.NomeTabela.split('_')[2]]}]</b> ` : '') + item.title ?? '';
+          type.innerHTML = item.type ?? '';
+          naturalPersonNameCell.innerHTML = item.name ?? '';
+          campus.innerHTML = item.campus ?? '';
+          link.innerHTML = item.link
+            ? item.link?.includes("http")
+              ? `<a href="${item.link.substring(1, item.link.length - 1)}" target="_blanck">Acessar</a>`
+              : item?.link
+            : '';
+        });
+      });
+  }
+</script>
 
 </html>
